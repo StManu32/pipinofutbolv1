@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Camino de Pipino al Éxito Futbolístico</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-container {
+            width: 800px;
+            height: 600px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        #image-container {
+            width: 100%;
+            height: 300px;
+            background-size: cover;
+            background-position: center;
+        }
+        #story-container {
+            padding: 20px;
+            height: 180px;
+            overflow-y: auto;
+        }
+        #choices-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+        #stats-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="image-container"></div>
+        <div id="story-container"></div>
+        <div id="choices-container"></div>
+        <div id="stats-container"></div>
+    </div>
+
+    <script>
+        const gameState = {
+            location: 'start',
+            stats: {
+                skill: 50,
+                health: 100,
+                motivation: 100,
+                money: 500
+            },
+            inventory: []
+        };
+
+        const gameData = {
+            start: {
+                text: "Pipino, un joven de 18 años de Rosario, sueña con convertirse en un jugador de fútbol profesional. Está parado frente al Monumento a la Bandera, pensando en su futuro. ¿Qué debería hacer?",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Ir al Parque España a practicar", nextLocation: "parqueEspana" },
+                    { text: "Visitar el estadio de Newell's", nextLocation: "estadioNewells" },
+                    { text: "Ir a una fiesta con amigos", nextLocation: "fiesta" }
+                ]
+            },
+            parqueEspana: {
+                text: "Pipino llega al Parque España y ve a un grupo jugando fútbol. Se une al juego y demuestra sus habilidades.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Jugar agresivamente para impresionar", nextLocation: "jugarAgresivo" },
+                    { text: "Jugar en equipo y mostrar deportividad", nextLocation: "jugarEquipo" },
+                    { text: "Desafiar al mejor jugador a un uno contra uno", nextLocation: "desafiarMejor" }
+                ]
+            },
+            estadioNewells: {
+                text: "Pipino visita el estadio de Newell's. Ve que hay pruebas para juveniles.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Inscribirse en las pruebas", nextLocation: "pruebasNewells" },
+                    { text: "Hablar con un cazatalentos", nextLocation: "hablarCazatalentos" },
+                    { text: "Volver a casa a entrenar más", nextLocation: "entrenarCasa" }
+                ]
+            },
+            fiesta: {
+                text: "Pipino va a la fiesta. Sus amigos lo animan a beber y quedarse hasta tarde.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Beber y divertirse toda la noche", nextLocation: "beberMucho" },
+                    { text: "Tomar moderadamente y volver temprano", nextLocation: "beberModerado" },
+                    { text: "Rechazar el alcohol y volver a casa", nextLocation: "rechazarAlcohol" }
+                ]
+            },
+            jugarAgresivo: {
+                text: "Pipino juega agresivamente. Impresiona a algunos, pero se lesiona.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Ignorar el dolor y seguir jugando", nextLocation: "ignorarLesion" },
+                    { text: "Detenerse y buscar atención médica", nextLocation: "atenciónMédica" }
+                ],
+                consequences: { skill: 5, health: -20, motivation: 10 }
+            },
+            jugarEquipo: {
+                text: "Pipino juega en equipo. Todos disfrutan del partido y un entrenador local lo nota.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Hablar con el entrenador", nextLocation: "hablarEntrenador" },
+                    { text: "Seguir jugando con el grupo", nextLocation: "seguirJugando" }
+                ],
+                consequences: { skill: 10, health: 5, motivation: 15 }
+            },
+            desafiarMejor: {
+                text: "Pipino desafía al mejor jugador a un uno contra uno. Es un juego intenso que atrae la atención de todos en el parque.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Usar técnica y habilidad", nextLocation: "usarTecnica" },
+                    { text: "Jugar de manera física y agresiva", nextLocation: "jugarFisico" }
+                ],
+                consequences: { skill: 10, health: -5, motivation: 5 }
+            },
+            pruebasNewells: {
+                text: "Pipino participa en las pruebas. Da lo mejor de sí, pero la competencia es dura.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Esperar los resultados con optimismo", nextLocation: "esperarResultados" },
+                    { text: "Pedir feedback a los entrenadores", nextLocation: "pedirFeedback" }
+                ],
+                consequences: { skill: 15, motivation: 10, money: -50 }
+            },
+            hablarCazatalentos: {
+                text: "Pipino se acerca a un cazatalentos y le habla sobre sus aspiraciones futbolísticas.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Mostrar confianza y determinación", nextLocation: "mostrarConfianza" },
+                    { text: "Pedir consejos humildemente", nextLocation: "pedirConsejos" }
+                ],
+                consequences: { motivation: 15, skill: 5 }
+            },
+            entrenarCasa: {
+                text: "Pipino decide volver a casa para entrenar más duro.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Hacer entrenamiento físico", nextLocation: "entrenamientoFisico" },
+                    { text: "Practicar técnica con el balón", nextLocation: "practicaTecnica" }
+                ],
+                consequences: { skill: 10, health: 5, motivation: 5 }
+            },
+            beberMucho: {
+                text: "Pipino bebe en exceso. Al día siguiente, se siente terrible y pierde un entrenamiento importante.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Prometer no volver a beber y entrenar duro", nextLocation: "promesaNoAlcohol" },
+                    { text: "Seguir saliendo de fiesta regularmente", nextLocation: "fiestaRegular" }
+                ],
+                consequences: { skill: -10, health: -20, motivation: -15, money: -100 }
+            },
+            beberModerado: {
+                text: "Pipino toma moderadamente y vuelve temprano a casa. Se divierte sin excesos.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Levantarse temprano para entrenar", nextLocation: "entrenamientoManana" },
+                    { text: "Dormir hasta tarde", nextLocation: "dormirTarde" }
+                ],
+                consequences: { health: -5, motivation: 5, money: -50 }
+            },
+            rechazarAlcohol: {
+                text: "Pipino rechaza el alcohol y vuelve a casa temprano, priorizando su carrera.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Estudiar tácticas de fútbol", nextLocation: "estudiarTacticas" },
+                    { text: "Descansar bien para el entrenamiento de mañana", nextLocation: "descansoCompleto" }
+                ],
+                consequences: { motivation: 10, health: 5 }
+            },
+            ignorarLesion: {
+                text: "Pipino ignora el dolor y sigue jugando, empeorando su lesión.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Finalmente ir al médico", nextLocation: "visitaMedica" },
+                    { text: "Seguir ignorando el dolor", nextLocation: "lesionCronica" }
+                ],
+                consequences: { health: -30, skill: -5 }
+            },
+            atenciónMédica: {
+                text: "Pipino busca atención médica. El doctor le aconseja reposo y rehabilitación.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Seguir el consejo médico", nextLocation: "seguirTratamiento" },
+                    { text: "Ignorar el consejo y volver a jugar", nextLocation: "ignorarConsejo" }
+                ],
+                consequences: { health: 10, money: -100 }
+            },
+            hablarEntrenador: {
+                text: "El entrenador está impresionado con Pipino y le ofrece unirse a un equipo local.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Aceptar la oferta", nextLocation: "unirseEquipoLocal" },
+                    { text: "Pedir tiempo para pensarlo", nextLocation: "pensarOferta" }
+                ],
+                consequences: { motivation: 20, skill: 10 }
+            },
+            seguirJugando: {
+                text: "Pipino decide seguir jugando con el grupo, mejorando su juego en equipo.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Proponer un partido organizado", nextLocation: "organizarPartido" },
+                    { text: "Practicar tiros libres", nextLocation: "practicaTirosLibres" }
+                ],
+                consequences: { skill: 15, health: -5 }
+            },
+            usarTecnica: {
+                text: "Pipino utiliza su técnica y habilidad en el uno contra uno, impresionando a los espectadores.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Celebrar la victoria con humildad", nextLocation: "celebrarHumildad" },
+                    { text: "Retar a más jugadores", nextLocation: "retarMasJugadores" }
+                ],
+                consequences: { skill: 20, motivation: 15 }
+            },
+            jugarFisico: {
+                text: "Pipino juega de manera física y agresiva, ganando el desafío pero generando tensión.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Disculparse por la agresividad", nextLocation: "disculparseAgresividad" },
+                    { text: "Mantener la actitud agresiva", nextLocation: "mantenerAgresividad" }
+                ],
+                consequences: { skill: 15, health: -10, motivation: -5 }
+            },
+            esperarResultados: {
+                text: "Pipino espera ansiosamente los resultados de las pruebas en Newell's.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Ser seleccionado", nextLocation: "seleccionadoNewells" },
+                    { text: "No ser seleccionado", nextLocation: "noSeleccionado" }
+                ],
+                consequences: { motivation: -5, skill: 5 }
+            },
+            pedirFeedback: {
+                text: "Pipino pide feedback a los entrenadores después de las pruebas.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Recibir críticas constructivas", nextLocation: "recibirCriticas" },
+                    { text: "Obtener elogios y sugerencias", nextLocation: "recibirElogios" }
+                ],
+                consequences: { skill: 10, motivation: 10 }
+            },
+            mostrarConfianza: {
+                text: "Pipino muestra confianza al hablar con el cazatalentos, quien aprecia su actitud.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Pedir una oportunidad de prueba", nextLocation: "pedirPrueba" },
+                    { text: "Solicitar consejos para mejorar", nextLocation: "solicitarConsejos" }
+                ],
+                consequences: { motivation: 20, skill: 5 }
+            },
+            pedirConsejos: {
+                text: "Pipino pide consejos humildemente al cazatalentos, quien aprecia su disposición a aprender.",
+                image: "/api/placeholder/800/300",
+                choices: [
+                    { text: "Seguir los consejos al pie de la letra", nextLocation: "seguirConsejos" },
+                    { text: "Adaptar los consejos a su estilo", nextLocation: "adaptarConsejos" }
+                ],
+                consequences: { skill: 15, motivation
